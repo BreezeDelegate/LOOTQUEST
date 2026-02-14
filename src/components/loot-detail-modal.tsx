@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -21,13 +21,13 @@ type LootDetailModalProps = {
 };
 
 export default function LootDetailModal({ isOpen, onClose, lootDiscovery, initialLootItem, onLootAdded }: LootDetailModalProps) {
-  const [lootItem, setLootItem] = useState<LootItem | null>(initialLootItem || null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [generatedLootItem, setGeneratedLootItem] = useState<LootItem | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (lootDiscovery && !initialLootItem) {
       const fetchLore = async () => {
-        setIsLoading(true);
+        setIsGenerating(true);
         const lore = await generateLootLore({ itemName: lootDiscovery.name, itemType: lootDiscovery.type });
         const placeholderImage = PlaceHolderImages.find(p => p.id === lootDiscovery.imageId);
         const newItem: LootItem = {
@@ -38,21 +38,39 @@ export default function LootDetailModal({ isOpen, onClose, lootDiscovery, initia
           imageUrl: placeholderImage?.imageUrl || '',
           imageHint: placeholderImage?.imageHint || '',
         };
-        setLootItem(newItem);
+        setGeneratedLootItem(newItem);
         if (onLootAdded) {
           onLootAdded(newItem);
         }
-        setIsLoading(false);
+        setIsGenerating(false);
       };
       fetchLore();
     }
   }, [lootDiscovery, onLootAdded, initialLootItem]);
+
+  const itemForDisplay = useMemo(() => {
+    if (initialLootItem) return initialLootItem;
+    if (generatedLootItem) return generatedLootItem;
+    if (lootDiscovery) {
+      const placeholderImage = PlaceHolderImages.find(p => p.id === lootDiscovery.imageId);
+      // Create a temporary item to display while lore is generating
+      return {
+        id: 'temp',
+        name: lootDiscovery.name,
+        type: lootDiscovery.type,
+        lore: '', // Lore will be shown via skeleton
+        imageUrl: placeholderImage?.imageUrl || '',
+        imageHint: placeholderImage?.imageHint || '',
+      } as LootItem;
+    }
+    return null;
+  }, [initialLootItem, generatedLootItem, lootDiscovery]);
   
-  const item = initialLootItem || lootItem;
+  const finalItem = initialLootItem || generatedLootItem;
 
   const handleClose = () => {
     // Prevent closing while generating lore for a new item
-    if (lootDiscovery && isLoading) return;
+    if (isGenerating) return;
     onClose();
   }
 
@@ -60,7 +78,7 @@ export default function LootDetailModal({ isOpen, onClose, lootDiscovery, initia
     <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
             <AnimatePresence>
-            {item && (
+            {itemForDisplay && (
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -69,11 +87,11 @@ export default function LootDetailModal({ isOpen, onClose, lootDiscovery, initia
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="relative aspect-square md:aspect-auto">
               <Image
-                src={item.imageUrl}
-                alt={item.name}
+                src={itemForDisplay.imageUrl}
+                alt={itemForDisplay.name}
                 fill
                 className="object-cover"
-                data-ai-hint={item.imageHint}
+                data-ai-hint={itemForDisplay.imageHint}
               />
                {lootDiscovery && (
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
@@ -90,25 +108,25 @@ export default function LootDetailModal({ isOpen, onClose, lootDiscovery, initia
             </div>
             <div className="flex flex-col">
               <DialogHeader className="p-6 pb-2 text-left">
-                <DialogTitle className="font-headline text-3xl">{item.name}</DialogTitle>
-                <DialogDescription className="text-accent">{item.type}</DialogDescription>
+                <DialogTitle className="font-headline text-3xl">{itemForDisplay.name}</DialogTitle>
+                <DialogDescription className="text-accent">{itemForDisplay.type}</DialogDescription>
               </DialogHeader>
               <ScrollArea className="flex-1 px-6">
                 <div className="text-foreground/80 leading-relaxed pr-4 max-h-[300px]">
-                  {isLoading ? (
+                  {isGenerating ? (
                     <div className="space-y-2 pt-2">
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-4 w-[80%]" />
                     </div>
                   ) : (
-                    <p className="whitespace-pre-wrap">{item.lore}</p>
+                    <p className="whitespace-pre-wrap">{finalItem?.lore}</p>
                   )}
                 </div>
               </ScrollArea>
               <DialogFooter className="p-6 pt-4 flex-row justify-end space-x-2">
-                <ShareButton item={item} />
-                <Button onClick={handleClose} variant="outline">
+                <ShareButton item={finalItem} />
+                <Button onClick={handleClose} variant="outline" disabled={isGenerating}>
                     {lootDiscovery ? "Continue Journey" : "Close"}
                 </Button>
               </DialogFooter>
