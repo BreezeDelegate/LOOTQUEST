@@ -92,7 +92,7 @@ export const story: StoryScene[] = [
     chapter: 'I · The Crossroads',
     title: 'Where the roads remember',
     text:
-      'At dusk, three roads meet beneath a dead lantern. The northern stones hum with buried voices. The eastern ridge burns gold beneath a sun that should already have set. A narrow western trail disappears into rain.\n\nA note pinned to the lantern bears your name: “Bring three relics to the Hollow Archive before midnight. Decide what deserves to survive.”',
+      'At dusk, three roads meet beneath a dead lantern. The northern stones hum with buried voices. The eastern ridge burns gold beneath a sun that should already have set. A narrow western trail disappears into rain. An ash-black compass hangs from the signpost.\n\nA note pinned to the lantern bears your name: “Bring three relics to the Hollow Archive before midnight. Decide what deserves to survive.”',
     choices: [
       {
         id: 'north-first',
@@ -108,9 +108,13 @@ export const story: StoryScene[] = [
       },
       {
         id: 'west-first',
-        text: 'Take the flooded road toward the ruined village.',
+        text: 'Take the Ashen Compass and follow the flooded road.',
         nextSceneId: 'rain-village',
-        effect: { stats: { mercy: 1 }, flags: ['chose-west'] },
+        effect: {
+          stats: { mercy: 1 },
+          itemId: 'ashen-compass',
+          flags: ['chose-west'],
+        },
       },
     ],
   },
@@ -125,7 +129,11 @@ export const story: StoryScene[] = [
         id: 'answer-honestly',
         text: 'Answer honestly, though the words cost you.',
         nextSceneId: 'hollow-pool',
-        effect: { stats: { insight: 2 }, itemId: 'glass-key', flags: ['spoke-truth'] },
+        effect: {
+          stats: { insight: 2 },
+          itemId: 'glass-key',
+          flags: ['spoke-truth'],
+        },
       },
       {
         id: 'force-door',
@@ -145,29 +153,8 @@ export const story: StoryScene[] = [
       {
         id: 'take-amulet',
         text: 'Take the amulet and promise to remember without obeying.',
-        nextSceneId: 'return-crossroads-north',
+        nextSceneId: 'road-check',
         effect: { itemId: 'whispering-amulet', stats: { insight: 1 } },
-      },
-    ],
-  },
-  {
-    id: 'return-crossroads-north',
-    chapter: 'III · The Remaining Roads',
-    title: 'The lantern wakes',
-    text:
-      'When you return, one face of the lantern glows. Two roads remain, and the note now carries a second line: “A relic changes the hand that carries it.”',
-    choices: [
-      {
-        id: 'north-to-east',
-        text: 'Climb the eastern ridge.',
-        nextSceneId: 'sun-ridge',
-        requirement: { notFlag: 'visited-east' },
-      },
-      {
-        id: 'north-to-west',
-        text: 'Enter the western rain.',
-        nextSceneId: 'rain-village',
-        requirement: { notFlag: 'visited-west' },
       },
     ],
   },
@@ -182,13 +169,19 @@ export const story: StoryScene[] = [
         id: 'stand-ground',
         text: 'Stand your ground and disarm him without retreating.',
         nextSceneId: 'sun-altar',
-        effect: { stats: { resolve: 2 }, flags: ['visited-east', 'spared-guardian'] },
+        effect: {
+          stats: { resolve: 2 },
+          flags: ['visited-east', 'spared-guardian'],
+        },
       },
       {
         id: 'hear-guardian',
         text: 'Lower your weapon and ask what was stolen.',
         nextSceneId: 'sun-altar',
-        effect: { stats: { mercy: 1, insight: 1 }, flags: ['visited-east', 'spared-guardian'] },
+        effect: {
+          stats: { mercy: 1, insight: 1 },
+          flags: ['visited-east', 'spared-guardian'],
+        },
       },
     ],
   },
@@ -218,13 +211,19 @@ export const story: StoryScene[] = [
         id: 'save-family',
         text: 'Give the boat to the family and cross through the flood alone.',
         nextSceneId: 'moon-shrine',
-        effect: { stats: { mercy: 2, resolve: 1 }, flags: ['visited-west', 'saved-family'] },
+        effect: {
+          stats: { mercy: 2, resolve: 1 },
+          flags: ['visited-west', 'saved-family'],
+        },
       },
       {
         id: 'take-boat',
         text: 'Take the boat. The Archive cannot wait.',
         nextSceneId: 'moon-shrine',
-        effect: { stats: { resolve: 2 }, flags: ['visited-west', 'abandoned-family'] },
+        effect: {
+          stats: { resolve: 2 },
+          flags: ['visited-west', 'abandoned-family'],
+        },
       },
     ],
   },
