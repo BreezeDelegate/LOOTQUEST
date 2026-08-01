@@ -8,6 +8,9 @@ import type {
   StoryChoice,
   StoryScene,
 } from './types';
+import { validateCampaign } from './validate-content';
+
+validateCampaign();
 
 const emptyStats: GameStats = {
   resolve: 0,
