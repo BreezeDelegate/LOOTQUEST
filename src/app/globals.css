@@ -3,57 +3,56 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
-  }
-
+  :root,
   .dark {
-    --background: 240 20% 15%; /* #1E1E2E */
-    --foreground: 210 40% 98%;
-    --card: 240 20% 20%;
-    --card-foreground: 210 40% 98%;
-    --popover: 240 20% 15%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 240 42% 40%; /* #3D3D8F */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 240 20% 25%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 240 20% 25%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 210 70% 60%; /* #5299E0 */
-    --accent-foreground: 240 20% 10%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 20% 25%;
-    --input: 240 20% 25%;
-    --ring: 210 70% 60%;
+    --background: 252 21% 8%;
+    --foreground: 42 36% 94%;
+    --card: 250 18% 12%;
+    --card-foreground: 42 36% 94%;
+    --popover: 250 18% 10%;
+    --popover-foreground: 42 36% 94%;
+    --primary: 37 67% 58%;
+    --primary-foreground: 252 24% 9%;
+    --secondary: 250 14% 18%;
+    --secondary-foreground: 42 32% 92%;
+    --muted: 250 13% 17%;
+    --muted-foreground: 40 12% 66%;
+    --accent: 191 42% 53%;
+    --accent-foreground: 252 24% 9%;
+    --destructive: 2 54% 43%;
+    --destructive-foreground: 42 36% 96%;
+    --border: 250 13% 23%;
+    --input: 250 13% 23%;
+    --ring: 37 67% 58%;
+    --radius: 0.75rem;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
+
+  html {
+    min-width: 320px;
+    background: hsl(var(--background));
+  }
+
   body {
     @apply bg-background text-foreground font-body;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.28);
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }
