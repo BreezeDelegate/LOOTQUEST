@@ -1,6 +1,12 @@
 # LootQuest
 
+**Play the public build:** [lootquest-play.netlify.app](https://lootquest-play.netlify.app)
+
 LootQuest is a short branching fantasy adventure about forgotten relics and difficult choices. Explore three routes, shape your character through Resolve, Insight and Mercy, then decide the fate of the Hollow Archive. A run takes roughly 15–25 minutes, while discovered relics and endings stay in your Chronicle for later runs.
+
+## Play online
+
+Open the public Netlify build above. Progress is stored locally in the browser, so no account is required.
 
 ## Play locally
 
@@ -63,7 +69,7 @@ src/
 │   └── layout.tsx               # Application shell
 ├── components/
 │   ├── header.tsx
-│   └── ui/                      # Reusable interface primitives
+│   └── ui/                      # Four interface primitives used by the game
 ├── contexts/
 │   └── game-state-context.tsx   # Persistent player state
 ├── game/
@@ -107,4 +113,4 @@ No player data is sent to a server.
 
 ## Deployment
 
-LootQuest is a standard Next.js application and can be deployed on any platform that supports Node.js. No environment variables or external services are required.
+The public build is hosted on Netlify from the `main` branch. LootQuest is a standard Next.js application and does not require environment variables or external services.
