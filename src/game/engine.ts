@@ -127,9 +127,21 @@ export function meetsRequirement(save: GameSave, requirement?: ChoiceRequirement
 }
 
 export function availableChoices(save: GameSave, scene: StoryScene): StoryChoice[] {
-  return scene.choices.filter(
+  const visible = scene.choices.filter(
     (choice) => !choice.hideWhenUnavailable || meetsRequirement(save, choice.requirement)
   );
+
+  if (scene.endingId || visible.some((choice) => meetsRequirement(save, choice.requirement))) {
+    return visible;
+  }
+
+  return [
+    {
+      id: `leave-${scene.id}`,
+      text: 'Return to the lantern and reconsider the remaining paths.',
+      nextSceneId: 'road-check',
+    },
+  ];
 }
 
 function applyEffect(save: GameSave, effect?: ChoiceEffect): GameSave {
@@ -202,6 +214,9 @@ export function resetEverything(): GameSave {
 
 export function runProgress(save: GameSave): number {
   const storyScenes = story.filter((scene) => !scene.endingId).length;
-  const visited = save.visitedSceneIds.filter((id) => story.some((scene) => scene.id === id && !scene.endingId)).length;
+  const visited = save.visitedSceneIds.filter((id) =>
+    story.some((scene) => scene.id === id && !scene.endingId)
+  ).length;
+
   return Math.min(100, Math.round((visited / storyScenes) * 100));
 }
