@@ -1,6 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
 
 function resolveInitialValue<T>(initialValue: T | (() => T)): T {
   return typeof initialValue === 'function'
@@ -8,7 +14,11 @@ function resolveInitialValue<T>(initialValue: T | (() => T)): T {
     : initialValue;
 }
 
-function readValue<T>(key: string, initialValue: T | (() => T), parse?: (value: unknown) => T): T {
+function readValue<T>(
+  key: string,
+  initialValue: T | (() => T),
+  parse?: (value: unknown) => T
+): T {
   const fallback = resolveInitialValue(initialValue);
 
   if (typeof window === 'undefined') {
@@ -32,14 +42,16 @@ export function useLocalStorage<T>(
   key: string,
   initialValue: T | (() => T),
   parse?: (value: unknown) => T
-): [T, React.Dispatch<React.SetStateAction<T>>, boolean] {
-  const [storedValue, setStoredValue] = useState<T>(() => resolveInitialValue(initialValue));
+): [T, Dispatch<SetStateAction<T>>, boolean] {
+  const [storedValue, setStoredValue] = useState<T>(() =>
+    resolveInitialValue(initialValue)
+  );
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     setStoredValue(readValue(key, initialValue, parse));
     setReady(true);
-  }, [key, parse]);
+  }, [initialValue, key, parse]);
 
   useEffect(() => {
     if (!ready) {
