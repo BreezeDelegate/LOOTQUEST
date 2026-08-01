@@ -73,7 +73,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
           if (item.name === 'Sunstone Gauntlet') return 'sunstone-gauntlet';
           return null;
         })
-        .filter((id): id is string => !!id);
+        .filter((id): id is 'whispering-amulet' | 'sunstone-gauntlet' => !!id);
 
       if (legacyIds.length > 0) {
         setSave((current) => ({
