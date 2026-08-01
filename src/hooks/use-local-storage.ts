@@ -1,48 +1,71 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-function getValue<T>(key: string, initialValue: T | (() => T)) {
+function resolveInitialValue<T>(initialValue: T | (() => T)): T {
+  return typeof initialValue === 'function'
+    ? (initialValue as () => T)()
+    : initialValue;
+}
+
+function readValue<T>(key: string, initialValue: T | (() => T), parse?: (value: unknown) => T): T {
+  const fallback = resolveInitialValue(initialValue);
+
   if (typeof window === 'undefined') {
-    return initialValue instanceof Function ? initialValue() : initialValue;
+    return fallback;
   }
+
   try {
-    const item = window.localStorage.getItem(key);
-    return item ? JSON.parse(item) : (initialValue instanceof Function ? initialValue() : initialValue);
-  } catch (error) {
-    console.warn(`Error reading localStorage key “${key}”:`, error);
-    return initialValue instanceof Function ? initialValue() : initialValue;
+    const stored = window.localStorage.getItem(key);
+    if (!stored) {
+      return fallback;
+    }
+
+    const parsed: unknown = JSON.parse(stored);
+    return parse ? parse(parsed) : (parsed as T);
+  } catch {
+    return fallback;
   }
 }
 
-export function useLocalStorage<T>(key: string, initialValue: T | (() => T)): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const [storedValue, setStoredValue] = useState<T>(() => getValue(key, initialValue));
+export function useLocalStorage<T>(
+  key: string,
+  initialValue: T | (() => T),
+  parse?: (value: unknown) => T
+): [T, React.Dispatch<React.SetStateAction<T>>, boolean] {
+  const [storedValue, setStoredValue] = useState<T>(() => resolveInitialValue(initialValue));
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    try {
-      const valueToStore = storedValue instanceof Function ? storedValue(storedValue) : storedValue;
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.warn(`Error setting localStorage key “${key}”:`, error);
+    setStoredValue(readValue(key, initialValue, parse));
+    setReady(true);
+  }, [key, parse]);
+
+  useEffect(() => {
+    if (!ready) {
+      return;
     }
-  }, [key, storedValue]);
-  
-  // This effect ensures that the state is synced with localStorage on mount on the client.
+
+    try {
+      window.localStorage.setItem(key, JSON.stringify(storedValue));
+    } catch {
+      // The in-memory session still works when storage is unavailable.
+    }
+  }, [key, ready, storedValue]);
+
+  const handleStorage = useCallback(
+    (event: StorageEvent) => {
+      if (event.key === key) {
+        setStoredValue(readValue(key, initialValue, parse));
+      }
+    },
+    [initialValue, key, parse]
+  );
+
   useEffect(() => {
-    const handleStorageChange = () => {
-      setStoredValue(getValue(key, initialValue));
-    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [handleStorage]);
 
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Set initial value on client mount if it differs from server-rendered value
-    setStoredValue(getValue(key, initialValue));
-    
-    return () => {
-        window.removeEventListener('storage', handleStorageChange);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
-
-  return [storedValue, setStoredValue];
+  return [storedValue, setStoredValue, ready];
 }
